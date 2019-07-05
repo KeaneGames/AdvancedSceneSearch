@@ -21,6 +21,7 @@ Well, this tool should solve your problems!
 * Components
   * Specific combination of components
   * Specific amount of components
+  * Specific serialized values changed from their default
 * Tags
 * Layers
 * Shaders
