@@ -3,7 +3,7 @@ A tool for unity allowing you to search for specific GameObjects in the scene, u
 
 
 Ever have an object in your scene with one awkward setting on and you have to go through every object to find it?
-Or say you want to find every UI text using a specific font?
+
 Or even, all the objects with exactly 5 audiosources, a mesh renderer, and the word HACK in the name?
 
 Well, this tool should solve your problems!
