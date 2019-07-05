@@ -8,6 +8,8 @@ Or even, all the objects with exactly 5 audiosources, a mesh renderer, and the w
 
 Well, this tool should solve your problems!
 
+![Advanced Scene Search](http://jacobkeane.co.uk/wp-content/uploads/2017/08/170815_Unity_Kv6wv31.png)
+
 ---
 
 **Filters**
@@ -19,7 +21,6 @@ Well, this tool should solve your problems!
 * Components
   * Specific combination of components
   * Specific amount of components
-  * Specific, serialized settings on components
 * Tags
 * Layers
 * Shaders
