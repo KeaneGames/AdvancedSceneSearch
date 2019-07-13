@@ -37,5 +37,18 @@ Should work from Unity 5 to Unity 2019, but let me know if you have any problems
 
 
 ---
+ 
+## How do I use it?
 
-Use the ? button to select individual serialized values you want to search for. Disable ? mode to set those values
+Checkout / grab a zip of this repo, and place the files from it somewhere in your project. 
+I'd recommend throwing it under something like Assets/Third Party/AdvancedSceneSearch/, just to not have all of the editor tools and plugins clutter up your repo over time.
+
+Then, go to Tools -> Advanced Scene Search to open the scene search window, OR select Tools -> Advanced scene search launch window, which will give you a tiny dockable window (I normally dock it at the bottom of the hierarchy), which you can drag a GameObject onto to launch the search window and autofill settings from that object
+
+![Advanced Scene Search Launch Window](https://i.imgur.com/jGLvv4v.png)
+
+
+The "?" button lets you select individual serialized values to srearch for - enable it to pick which values to list, and when it's disabled, you can set those values.
+
+![Advanced Scene Search Launch Window](https://i.imgur.com/wdmyFGA.gif)
+
