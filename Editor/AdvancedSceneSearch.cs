@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
 namespace KeaneGames.AdvancedSceneSearch
 {
+
     /// <summary>
     /// A unity editor window that allows you to search the scene for objects with
     /// specific properties
@@ -16,6 +18,7 @@ namespace KeaneGames.AdvancedSceneSearch
     {
         private readonly GUIContent _settingsMenuItem = new GUIContent("Settings");
         private readonly GUIContent _searchMenuItem = new GUIContent("Search");
+        private readonly GUIContent _loadAllScenesMenuItem = new GUIContent("Load all Selected Scenes");
 
         [SerializeField]
         private CurrentPage _currentPage;
@@ -103,6 +106,11 @@ namespace KeaneGames.AdvancedSceneSearch
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+
+            menu.AddSeparator("");
+
+            menu.AddItem(_loadAllScenesMenuItem, false, LoadAllScenesSelected);
+
         }
 
         private void OnSelectedShaderPopup(string command, Shader shader)
@@ -400,6 +408,13 @@ namespace KeaneGames.AdvancedSceneSearch
             }
 
             Selection.objects = selectedObjs.ToArray();
+            
+            AdvancedSceneSearchResultsWindow window = (AdvancedSceneSearchResultsWindow)GetWindow(typeof(AdvancedSceneSearchResultsWindow));
+            window.autoRepaintOnSceneChange = true;
+            window.name = "Advanced Search Results";
+            window.titleContent = new GUIContent("Results", EditorGUIUtility.FindTexture("d_ViewToolZoom"));
+            window.Show();
+            window.SetResults(selectedObjs.ToArray());
         }
 
         private void DoReset()
@@ -427,7 +442,15 @@ namespace KeaneGames.AdvancedSceneSearch
             _currentPage = CurrentPage.Search;
         }
 
+        private void LoadAllScenesSelected()
+        {
+            string[] scenes = EditorBuildSettingsScene.GetActiveSceneList(EditorBuildSettings.scenes);
 
+            foreach(string scene in scenes)
+            {
+                EditorSceneManager.OpenScene(scene, OpenSceneMode.Additive);
+            }
+        }
     }
 
 
