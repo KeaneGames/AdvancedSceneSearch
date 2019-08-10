@@ -54,6 +54,11 @@ namespace KeaneGames.AdvancedSceneSearch
         private ASS_SearchFilter_Shader _filterShader;
 
         [SerializeField]
+        private ASS_SearchFilter_MeshName _filterMeshName;
+
+
+
+        [SerializeField]
         private ASS_SearchFilter[] _filters;
 
         #endregion
@@ -125,11 +130,13 @@ namespace KeaneGames.AdvancedSceneSearch
                 _filterLayer = new ASS_SearchFilter_Layer();
             if (_filterShader == null)
                 _filterShader = new ASS_SearchFilter_Shader();
+            if (_filterMeshName == null)
+                _filterMeshName = new ASS_SearchFilter_MeshName();
 
             if (_filters == null)
                 _filters = new ASS_SearchFilter[]
                 {
-                    _filterName, _filterTag, _filterLayer, _filterComponents, _filterShader
+                    _filterName, _filterTag, _filterLayer, _filterComponents, _filterShader, _filterMeshName
                 };
 
 
