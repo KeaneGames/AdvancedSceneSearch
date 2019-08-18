@@ -284,8 +284,10 @@ namespace KeaneGames.AdvancedSceneSearch
                     throw new NotImplementedException("Gradiant comparison for SerializedProperties has not been impleneted. TODO.");
                 case SerializedPropertyType.Quaternion:
                     return property.quaternionValue == dummyProperty.quaternionValue;
+#if UNITY_2017_1_OR_NEWER
                 case SerializedPropertyType.ExposedReference:
                     return property.exposedReferenceValue == dummyProperty.exposedReferenceValue;
+#endif
                 default:
                     throw new ArgumentOutOfRangeException();
             }

@@ -19,6 +19,7 @@ namespace KeaneGames.AdvancedSceneSearch
         private readonly GUIContent _settingsMenuItem = new GUIContent("Settings");
         private readonly GUIContent _searchMenuItem = new GUIContent("Search");
         private readonly GUIContent _loadAllScenesMenuItem = new GUIContent("Load all Selected Scenes");
+        private readonly GUIContent _popupResultsMenuItem = new GUIContent("Show results in new window");
 
         [SerializeField]
         private CurrentPage _currentPage;
@@ -32,8 +33,10 @@ namespace KeaneGames.AdvancedSceneSearch
         private StyleData _styleData;
         private Vector2 _scrollPos;
 
+        [SerializeField]
+        private bool popupResults;
 
-        private enum CurrentPage
+         private enum CurrentPage
         {
             Search = 0,
             Settings = 1
@@ -111,6 +114,7 @@ namespace KeaneGames.AdvancedSceneSearch
 
             menu.AddItem(_loadAllScenesMenuItem, false, LoadAllScenesSelected);
 
+            menu.AddItem(_popupResultsMenuItem, popupResults, PopupResultsSelected);
         }
 
         private void OnSelectedShaderPopup(string command, Shader shader)
@@ -407,14 +411,19 @@ namespace KeaneGames.AdvancedSceneSearch
                     selectedObjs = assSearchFilter.ApplyFilter(selectedObjs);
             }
 
-            Selection.objects = selectedObjs.ToArray();
-            
-            AdvancedSceneSearchResultsWindow window = (AdvancedSceneSearchResultsWindow)GetWindow(typeof(AdvancedSceneSearchResultsWindow));
-            window.autoRepaintOnSceneChange = true;
-            window.name = "Advanced Search Results";
-            window.titleContent = new GUIContent("Results", EditorGUIUtility.FindTexture("d_ViewToolZoom"));
-            window.Show();
-            window.SetResults(selectedObjs.ToArray());
+            if (popupResults)
+            {
+                AdvancedSceneSearchResultsWindow window = (AdvancedSceneSearchResultsWindow)GetWindow(typeof(AdvancedSceneSearchResultsWindow));
+                window.autoRepaintOnSceneChange = true;
+                window.name = "Advanced Search Results";
+                window.titleContent = new GUIContent("Results", EditorGUIUtility.FindTexture("d_ViewToolZoom"));
+                window.Show();
+                window.SetResults(selectedObjs.ToArray());
+            }
+            else
+            {
+                Selection.objects = selectedObjs.ToArray();
+            }
         }
 
         private void DoReset()
@@ -441,7 +450,10 @@ namespace KeaneGames.AdvancedSceneSearch
         {
             _currentPage = CurrentPage.Search;
         }
-
+        private void PopupResultsSelected ()
+        {
+            popupResults = !popupResults;
+        }
         private void LoadAllScenesSelected()
         {
             string[] scenes = EditorBuildSettingsScene.GetActiveSceneList(EditorBuildSettings.scenes);
