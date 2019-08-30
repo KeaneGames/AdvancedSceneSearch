@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -88,13 +89,20 @@ namespace KeaneGames.AdvancedSceneSearch
 
         }
 
-        internal void SetResults(GameObject[] gameObject)
+        public void SetResults(GameObject[] gameObject, bool clearResults = true)
         {
-            Results = new Dictionary<Scene, ResultData>();
+            if (clearResults || Results == null)
+                Clear();
+
             foreach (var item in gameObject)
             {
                 StoreResult(item);
             }
+        }
+
+        public void Clear()
+        {
+            Results = new Dictionary<Scene, ResultData>();
         }
     }
 

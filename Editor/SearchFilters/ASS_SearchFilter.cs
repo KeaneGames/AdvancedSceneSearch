@@ -35,6 +35,11 @@ namespace KeaneGames.AdvancedSceneSearch
             get { return _enabled; }
         }
 
+        public abstract bool Actionable
+        {
+            get;
+        }
+
         public void Setup(AdvancedSceneSearch main)
         {
             this.main = main;

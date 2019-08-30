@@ -70,13 +70,21 @@ namespace KeaneGames.AdvancedSceneSearch
             base.DrawSearchGui();
         }
 
+        public override bool Actionable
+        {
+            get
+            {
+                return _shader != null;
+            }
+        }
+
 
         public override IEnumerable<GameObject> ApplyFilter(IEnumerable<GameObject> selectedObjs)
         {
-            if (_shader == null)
-                return selectedObjs;
+            if (Actionable)
+                selectedObjs = selectedObjs.Where(x => x.GetComponent<Renderer>() != null && x.GetComponent<Renderer>().sharedMaterials.Any(y => y != null && y.shader == _shader));
 
-            return selectedObjs.Where(x => x.GetComponent<Renderer>() != null && x.GetComponent<Renderer>().sharedMaterials.Any(y => y != null && y.shader == _shader));
+            return selectedObjs;
         }
 
 

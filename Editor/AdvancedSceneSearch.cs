@@ -32,6 +32,15 @@ namespace KeaneGames.AdvancedSceneSearch
         private StyleData _styleData;
         private Vector2 _scrollPos;
 
+        public enum SearchType
+        {
+            CurrentScenes,
+            AllEnabledScenes,
+            AllScenes,
+            Project,
+        }
+
+        public SearchType CurrentSearchTarget;
 
         private enum CurrentPage
         {
@@ -320,12 +329,23 @@ namespace KeaneGames.AdvancedSceneSearch
         private void OnGUI_DrawSearch()
         {
             EditorGUIUtility.labelWidth = 85;
+
+            Color normalColor = GUI.color;
             foreach (ASS_SearchFilter assSearchFilter in _filters)
             {
                 if (assSearchFilter.Enabled)
-                    assSearchFilter.DrawSearchGui();
-            }
+                {
+                    if (assSearchFilter.Actionable)
+                        GUI.color = normalColor;
+                    else
+                        GUI.color = new Color(1,1,1,0.5f);
 
+                    assSearchFilter.DrawSearchGui();
+                }
+            }
+            GUI.color = normalColor;
+
+            CurrentSearchTarget = (SearchType) EditorGUILayout.EnumPopup(CurrentSearchTarget);
 
             // Settings
             GUILayout.BeginHorizontal();
@@ -373,7 +393,60 @@ namespace KeaneGames.AdvancedSceneSearch
             DropAreaGUI();
         }
 
-        private void DoSearch()
+        public void DoSearch()
+        {
+            switch (CurrentSearchTarget)
+            {
+                case SearchType.CurrentScenes:
+                    DoSearchCurrentScene(true);
+                    break;
+                case SearchType.AllEnabledScenes:
+                    ResultsWindow.Clear();
+                    string[] enabledScenes = EditorBuildSettingsScene.GetActiveSceneList(EditorBuildSettings.scenes);
+                    DoSearchScenes(enabledScenes);
+                    break;
+                case SearchType.AllScenes:
+                    ResultsWindow.Clear();
+                    var allSceneData = EditorBuildSettings.scenes;
+
+                    string[] allScenes = new string[allSceneData.Length];
+
+                    for (int i = 0; i < allSceneData.Length; i++)
+                    {
+                        allScenes[i] = allSceneData[i].path;
+                    }
+
+                    DoSearchScenes(allScenes);
+                    break;
+                case SearchType.Project:
+                    Debug.LogError("Not implemented yet :(");
+                    break;
+                default:
+                    break;
+            }
+
+
+        }
+
+        private void DoSearchScenes(string[] scenes)
+        {
+            bool cancel = false;
+            for (int i = 0; i < scenes.Length; i++)
+            {
+                string scene = (string)scenes[i];
+                cancel = EditorUtility.DisplayCancelableProgressBar("Searching Scenes", i + "/" + scenes.Length + ": " + scene, i / (float)scenes.Length);
+
+                if (cancel)
+                    break;
+                    
+                EditorSceneManager.OpenScene(scene, OpenSceneMode.Single);
+                DoSearchCurrentScene(false);
+            };
+
+            EditorUtility.ClearProgressBar();
+        }
+
+        private void DoSearchCurrentScene(bool clear)
         {
             List<GameObject> objs = null;
 
@@ -407,14 +480,29 @@ namespace KeaneGames.AdvancedSceneSearch
                     selectedObjs = assSearchFilter.ApplyFilter(selectedObjs);
             }
 
-            Selection.objects = selectedObjs.ToArray();
-            
-            AdvancedSceneSearchResultsWindow window = (AdvancedSceneSearchResultsWindow)GetWindow(typeof(AdvancedSceneSearchResultsWindow));
-            window.autoRepaintOnSceneChange = true;
-            window.name = "Advanced Search Results";
-            window.titleContent = new GUIContent("Results", EditorGUIUtility.FindTexture("d_ViewToolZoom"));
-            window.Show();
-            window.SetResults(selectedObjs.ToArray());
+            //Selection.objects = selectedObjs.ToArray();
+
+
+            ResultsWindow.SetResults(selectedObjs.ToArray(), clear);
+        }
+
+        private AdvancedSceneSearchResultsWindow _resultsWindow;
+
+        protected AdvancedSceneSearchResultsWindow ResultsWindow
+        {
+            get
+            {
+                if (_resultsWindow == null)
+                {
+                    _resultsWindow = (AdvancedSceneSearchResultsWindow)GetWindow(typeof(AdvancedSceneSearchResultsWindow));
+                    _resultsWindow.autoRepaintOnSceneChange = true;
+                    _resultsWindow.name = "Advanced Search Results";
+                    _resultsWindow.titleContent = new GUIContent("Results", EditorGUIUtility.FindTexture("d_ViewToolZoom"));
+                    _resultsWindow.Show();
+                }
+
+                return _resultsWindow;
+            }
         }
 
         private void DoReset()

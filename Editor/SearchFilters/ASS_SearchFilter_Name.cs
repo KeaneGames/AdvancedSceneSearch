@@ -66,9 +66,17 @@ namespace KeaneGames.AdvancedSceneSearch
             base.Reset();
         }
 
+        public override bool Actionable
+        {
+            get
+            {
+                return !string.IsNullOrEmpty(_nameSearch);
+            }
+        }
+
         public override IEnumerable<GameObject> ApplyFilter(IEnumerable<GameObject> selectedObjs)
         {
-            if (!string.IsNullOrEmpty(_nameSearch))
+            if (Actionable)
             {
                 Regex search;
 

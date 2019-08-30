@@ -40,9 +40,19 @@ namespace KeaneGames.AdvancedSceneSearch
             base.DrawSearchGui();
         }
 
+        public override bool Actionable
+        {
+            get
+            {
+                int allTags = (1 << InternalEditorUtility.tags.Length) - 1;
+                return !(_tagMask == ~0 || _tagMask == allTags || _tagMask == 0);
+            }
+        }
+
+
         public override IEnumerable<GameObject> ApplyFilter(IEnumerable<GameObject> selectedObjs)
         {
-            if (_tags.Count > 0)
+            if (Actionable)
             {
                 selectedObjs = selectedObjs.Where(x => _tags.Contains(x.tag));
             }

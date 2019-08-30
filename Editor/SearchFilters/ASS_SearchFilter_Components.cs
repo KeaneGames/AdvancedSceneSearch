@@ -175,9 +175,17 @@ namespace KeaneGames.AdvancedSceneSearch
             }
         }
 
+        public override bool Actionable
+        {
+            get
+            {
+                return components.Count > 0;
+            }
+        }
+
         public override IEnumerable<GameObject> ApplyFilter(IEnumerable<GameObject> selectedObjs)
         {
-            if (components.Count > 0)
+            if (Actionable)
             {
                 foreach (TypeSearchData typeData in components)
                 {
@@ -247,7 +255,7 @@ namespace KeaneGames.AdvancedSceneSearch
                         return true;
                     }
 
-                    throw new NotImplementedException("Generic comparison for SerializedProperties has not been impleneted. TODO.");
+                    throw new NotImplementedException("Generic comparison for SerializedProperties has not been implemented. TODO.");
                 case SerializedPropertyType.Integer:
                     return property.intValue == dummyProperty.intValue;
                 case SerializedPropertyType.Boolean:
@@ -281,7 +289,7 @@ namespace KeaneGames.AdvancedSceneSearch
                 case SerializedPropertyType.Bounds:
                     return property.boundsValue == dummyProperty.boundsValue;
                 case SerializedPropertyType.Gradient:
-                    throw new NotImplementedException("Gradiant comparison for SerializedProperties has not been impleneted. TODO.");
+                    throw new NotImplementedException("Gradiant comparison for SerializedProperties has not been implemented. TODO.");
                 case SerializedPropertyType.Quaternion:
                     return property.quaternionValue == dummyProperty.quaternionValue;
                 case SerializedPropertyType.ExposedReference:
