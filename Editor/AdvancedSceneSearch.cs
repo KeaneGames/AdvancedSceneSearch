@@ -19,6 +19,7 @@ namespace KeaneGames.AdvancedSceneSearch
         private readonly GUIContent _settingsMenuItem = new GUIContent("Settings");
         private readonly GUIContent _searchMenuItem = new GUIContent("Search");
         private readonly GUIContent _loadAllScenesMenuItem = new GUIContent("Load all Selected Scenes");
+        private readonly GUIContent _popupResultsMenuItem = new GUIContent("Show results in new window");
 
         [SerializeField]
         private CurrentPage _currentPage;
@@ -42,7 +43,11 @@ namespace KeaneGames.AdvancedSceneSearch
 
         public SearchType CurrentSearchTarget;
 
-        private enum CurrentPage
+        [SerializeField]
+        private bool popupResults;
+
+
+         private enum CurrentPage
         {
             Search = 0,
             Settings = 1
@@ -120,6 +125,7 @@ namespace KeaneGames.AdvancedSceneSearch
 
             menu.AddItem(_loadAllScenesMenuItem, false, LoadAllScenesSelected);
 
+            menu.AddItem(_popupResultsMenuItem, popupResults, PopupResultsSelected);
         }
 
         private void OnSelectedShaderPopup(string command, Shader shader)
@@ -480,10 +486,15 @@ namespace KeaneGames.AdvancedSceneSearch
                     selectedObjs = assSearchFilter.ApplyFilter(selectedObjs);
             }
 
-            //Selection.objects = selectedObjs.ToArray();
+            if (popupResults)
+            {
+				ResultsWindow.SetResults(selectedObjs.ToArray(), clear);
+            }
+            else
+            {
+                Selection.objects = selectedObjs.ToArray();
+			}
 
-
-            ResultsWindow.SetResults(selectedObjs.ToArray(), clear);
         }
 
         private AdvancedSceneSearchResultsWindow _resultsWindow;
@@ -529,7 +540,10 @@ namespace KeaneGames.AdvancedSceneSearch
         {
             _currentPage = CurrentPage.Search;
         }
-
+        private void PopupResultsSelected ()
+        {
+            popupResults = !popupResults;
+        }
         private void LoadAllScenesSelected()
         {
             string[] scenes = EditorBuildSettingsScene.GetActiveSceneList(EditorBuildSettings.scenes);

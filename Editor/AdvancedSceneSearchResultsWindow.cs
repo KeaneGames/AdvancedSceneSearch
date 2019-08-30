@@ -59,6 +59,8 @@ namespace KeaneGames.AdvancedSceneSearch
         public void OnGUI()
         {
             scrollPos = GUILayout.BeginScrollView(scrollPos);
+
+            if(Results != null)
             foreach (KeyValuePair<Scene, ResultData> resultPair in Results)
             {
                 GUILayout.BeginVertical();
