@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -15,6 +16,7 @@ namespace KeaneGames.AdvancedSceneSearch
             public int InstanceID;
             public Scene Scene;
             public string Name;
+            public string Path;
 
             public Result(GameObject obj) : this()
             {
@@ -22,8 +24,44 @@ namespace KeaneGames.AdvancedSceneSearch
                 this.InstanceID = obj.GetInstanceID();
                 this.Scene = obj.scene;
                 this.Name = obj.name;
+                this.Path = GetPath(obj);
+            }
+
+            public string GetPath(GameObject obj)
+            {
+                List<Transform> parents = new List<Transform>();
+
+                Transform current = obj.transform.parent;
+
+                while(current != null)
+                {
+                    parents.Add(current);
+                    current = current.parent;
+                }
+
+                StringBuilder sb = new StringBuilder();
+
+                for (int i = parents.Count -1; i > 0; i--)
+                {
+                    sb.Append(parents[i].name + "/");
+                }
+                sb.Append(obj.name);
+                return sb.ToString();
             }
         }
+
+        public class SceneData
+        {
+            public Scene Scene;
+            public string SceneName;
+
+            public SceneData(Scene scene)
+            {
+                this.Scene = scene;
+                this.SceneName = scene.name;
+            }
+        }
+
 
         public class ResultData
         {
@@ -44,14 +82,16 @@ namespace KeaneGames.AdvancedSceneSearch
             }
         }
 
-        public Dictionary<Scene, ResultData> Results;
+        public Dictionary<string, ResultData> Results;
 
         public void StoreResult(GameObject obj)
         {
-            if (!Results.ContainsKey(obj.scene))
-                Results.Add(obj.scene, new ResultData(obj.scene));
+            string scenePath = (obj.scene != null && obj.scene.path != null) ? obj.scene.path : "Project";
 
-            Results[obj.scene].Add(new Result(obj));
+            if (!Results.ContainsKey(scenePath))
+                Results.Add(scenePath, new ResultData(obj.scene));
+
+            Results[scenePath].Add(new Result(obj));
 
         }
 
@@ -61,14 +101,13 @@ namespace KeaneGames.AdvancedSceneSearch
             scrollPos = GUILayout.BeginScrollView(scrollPos);
 
             if(Results != null)
-            foreach (KeyValuePair<Scene, ResultData> resultPair in Results)
+            foreach (KeyValuePair<string, ResultData> resultPair in Results)
             {
                 GUILayout.BeginVertical();
 
-                if(GUILayout.Button("Scene: " + resultPair.Key.name))
-                {
-                    resultPair.Value.Expanded = !resultPair.Value.Expanded;
-                }
+                int resultCount = resultPair.Value.Results.Count;
+
+                resultPair.Value.Expanded = EditorGUILayout.Foldout(resultPair.Value.Expanded, "[" + resultCount + "] Scene: " + resultPair.Key);
 
                 if(resultPair.Value.Expanded)
                 {
@@ -76,7 +115,7 @@ namespace KeaneGames.AdvancedSceneSearch
                     {
                         GUILayout.BeginHorizontal();
 
-                        if (GUILayout.Button(result.Name, EditorStyles.miniButton, GUILayout.ExpandWidth(false)))
+                        if (GUILayout.Button(result.Path, EditorStyles.largeLabel, GUILayout.ExpandWidth(false)))
                         {
                             Selection.activeGameObject = result.GameObj;
                         }
@@ -104,7 +143,7 @@ namespace KeaneGames.AdvancedSceneSearch
 
         public void Clear()
         {
-            Results = new Dictionary<Scene, ResultData>();
+            Results = new Dictionary<string, ResultData>();
         }
     }
 

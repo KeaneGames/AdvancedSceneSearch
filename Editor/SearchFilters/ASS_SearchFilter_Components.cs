@@ -108,59 +108,74 @@ namespace KeaneGames.AdvancedSceneSearch
                     {
                         InitFakeObj();
 
+
                         Component dummyComponent = dummyObj.GetComponent(typeSearch.Type);
 
-                        SerializedObject obj = new SerializedObject(dummyComponent);
-                        SerializedProperty iterator = obj.GetIterator();
-
-                        bool enterChildren = true;
-                        while (iterator.NextVisible(enterChildren))
+                        if (dummyComponent == null)
                         {
-                            using (new EditorGUI.DisabledScope("m_Script" == iterator.propertyPath))
+                            Debug.LogError("ASS: Internal Error. Dummy Component of type " + typeSearch.Type.Name + " is missing!");
+                        }
+                        else
+                        {
+
+                            SerializedObject obj = new SerializedObject(dummyComponent);
+                            SerializedProperty iterator = obj.GetIterator();
+
+                            bool enterChildren = true;
+                            while (iterator.NextVisible(enterChildren))
                             {
-                                if (typeSearch.Expanded)
+                                using (new EditorGUI.DisabledScope("m_Script" == iterator.propertyPath))
                                 {
-                                    if (typeSearch.SerializedVars.Contains(iterator.name))
+                                    if (typeSearch.Expanded)
                                     {
-                                        if (!GUILayout.Toggle(true, iterator.displayName))
+                                        if (typeSearch.SerializedVars.Contains(iterator.name))
                                         {
-                                            typeSearch.SerializedVars.Remove(iterator.name);
+                                            if (!GUILayout.Toggle(true, iterator.displayName))
+                                            {
+                                                typeSearch.SerializedVars.Remove(iterator.name);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (GUILayout.Toggle(false, iterator.displayName))
+                                            {
+                                                typeSearch.SerializedVars.Add(iterator.name);
+                                            }
                                         }
                                     }
                                     else
                                     {
-                                        if (GUILayout.Toggle(false, iterator.displayName))
+                                        if (typeSearch.SerializedVars.Contains(iterator.name))
                                         {
-                                            typeSearch.SerializedVars.Add(iterator.name);
+                                            GUILayout.BeginHorizontal();
+                                            EditorGUILayout.PropertyField(iterator, true);
+
+                                            if (GUILayout.Button("X", GUILayout.Height(14), GUILayout.Width(20)))
+                                            {
+                                                typeSearch.SerializedVars.Remove(iterator.name);
+                                            }
+
+                                            GUILayout.EndHorizontal();
                                         }
                                     }
                                 }
-                                else
-                                {
-                                    if (typeSearch.SerializedVars.Contains(iterator.name))
-                                    {
-                                        GUILayout.BeginHorizontal();
-                                        EditorGUILayout.PropertyField(iterator, true);
 
-                                        if (GUILayout.Button("X", GUILayout.Height(14), GUILayout.Width(20)))
-                                        {
-                                            typeSearch.SerializedVars.Remove(iterator.name);
-                                        }
-
-                                        GUILayout.EndHorizontal();
-                                    }
-                                }
+                                enterChildren = false;
                             }
 
-                            enterChildren = false;
+                            obj.ApplyModifiedProperties();
                         }
-
-                        obj.ApplyModifiedProperties();
                     }
                 }
 
                 if (removeMe != null)
+                {
                     components.Remove(removeMe);
+
+                    // Remove the dummy component from our dummy object to stop type conflicts.
+                    var dummyComp = dummyObj.GetComponent(removeMe.Type.SystemType);
+                    GameObject.DestroyImmediate(dummyObj);
+                }
                 GUILayout.EndVertical();
             }
 

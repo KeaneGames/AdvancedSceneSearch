@@ -478,8 +478,12 @@ namespace KeaneGames.AdvancedSceneSearch
                 objs = FindObjectsOfType<Transform>().Select(x => x.gameObject).ToList();
             }
 
-            IEnumerable<GameObject> selectedObjs = objs;
 
+            DoSearchObjects(objs, clear);
+        }
+
+        public void DoSearchObjects(IEnumerable<GameObject> selectedObjs, bool clear)
+        {
             foreach (ASS_SearchFilter assSearchFilter in _filters)
             {
                 if (assSearchFilter.Enabled)
@@ -488,13 +492,12 @@ namespace KeaneGames.AdvancedSceneSearch
 
             if (popupResults)
             {
-				ResultsWindow.SetResults(selectedObjs.ToArray(), clear);
+                ResultsWindow.SetResults(selectedObjs.ToArray(), clear);
             }
             else
             {
                 Selection.objects = selectedObjs.ToArray();
-			}
-
+            }
         }
 
         private AdvancedSceneSearchResultsWindow _resultsWindow;
