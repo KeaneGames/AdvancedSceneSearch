@@ -451,12 +451,18 @@ namespace KeaneGames.AdvancedSceneSearch
                     for (int index = 0; index < prefabAssetCount; index++)
                     {
                         string prefabAssetPath = prefabAssetPaths[index];
-                        GameObject prefab = AssetDatabase.LoadMainAssetAtPath(prefabAssetPath) as GameObject;
+                        Object[] prefab = AssetDatabase.LoadAllAssetsAtPath(prefabAssetPath);
 
-                        if (prefab != null)
-                            allPrefabs.Add(prefab);
-                        else
-                            Debug.LogWarning("Failed to load prefab at path: " + prefabAssetPath);
+                        foreach (Object o in prefab)
+                        {
+                            GameObject gameObject = o as GameObject;
+
+                            if(gameObject == null)
+                                continue;
+
+                            allPrefabs.Add(gameObject);
+                        }
+
 
 
                         EditorUtility.DisplayProgressBar("Searching project...", "Loading assets: " + index + "/" + prefabAssetCount, ((float)index / prefabAssetCount));

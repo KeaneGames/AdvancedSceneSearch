@@ -45,7 +45,7 @@ namespace KeaneGames.AdvancedSceneSearch
 
                 StringBuilder sb = new StringBuilder();
 
-                for (int i = parents.Count -1; i > 0; i--)
+                for (int i = parents.Count -1; i >= 0; i--)
                 {
                     sb.Append(parents[i].name + "/");
                 }
