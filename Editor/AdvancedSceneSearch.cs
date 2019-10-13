@@ -372,11 +372,15 @@ namespace KeaneGames.AdvancedSceneSearch
                 DoReset();
             }
 
-            if (GUILayout.Button("Search", GUILayout.Width(position.width * 0.75f), GUILayout.Height(24f)))
+            if (GUILayout.Button("Find All", GUILayout.Width(position.width * 0.60f), GUILayout.Height(24f)))
             {
                 DoSearch();
             }
 
+            if (GUILayout.Button("Find Next", GUILayout.Width(position.width * 0.15f), GUILayout.Height(24f)))
+            {
+                DoSearch(true);
+            }
             /*
             if (GUILayout.Button("S", GUILayout.Height(24f)))
             {
@@ -399,7 +403,7 @@ namespace KeaneGames.AdvancedSceneSearch
             DropAreaGUI();
         }
 
-        public void DoSearch()
+        public void DoSearch(bool stopOnResult = false)
         {
             switch (CurrentSearchTarget)
             {
@@ -409,7 +413,7 @@ namespace KeaneGames.AdvancedSceneSearch
                 case SearchType.AllEnabledScenes:
                     ResultsWindow.Clear();
                     string[] enabledScenes = EditorBuildSettingsScene.GetActiveSceneList(EditorBuildSettings.scenes);
-                    DoSearchScenes(enabledScenes);
+                    DoSearchScenes(enabledScenes, stopOnResult);
                     break;
                 case SearchType.AllScenes:
                     ResultsWindow.Clear();
@@ -422,10 +426,48 @@ namespace KeaneGames.AdvancedSceneSearch
                         allScenes[i] = allSceneData[i].path;
                     }
 
-                    DoSearchScenes(allScenes);
+                    DoSearchScenes(allScenes, stopOnResult);
                     break;
                 case SearchType.Project:
-                    Debug.LogError("Not implemented yet :(");
+
+                    EditorUtility.DisplayProgressBar("Searching project...", "Collecting assets", 0f);
+
+                    string[] allAssetPaths = AssetDatabase.GetAllAssetPaths();
+                    List<string> prefabAssetPaths = new List<string>();
+                    foreach (string path in allAssetPaths)
+                    {
+                        if(!path.Contains(".prefab"))
+                            continue;
+
+                        prefabAssetPaths.Add(path);
+                    }
+
+
+                    EditorUtility.DisplayProgressBar("Searching project...", "Loading assets", 0.01f);
+
+                    List<GameObject> allPrefabs = new List<GameObject>();
+
+                    int prefabAssetCount = prefabAssetPaths.Count;
+                    for (int index = 0; index < prefabAssetCount; index++)
+                    {
+                        string prefabAssetPath = prefabAssetPaths[index];
+                        GameObject prefab = AssetDatabase.LoadMainAssetAtPath(prefabAssetPath) as GameObject;
+
+                        if (prefab != null)
+                            allPrefabs.Add(prefab);
+                        else
+                            Debug.LogWarning("Failed to load prefab at path: " + prefabAssetPath);
+
+
+                        EditorUtility.DisplayProgressBar("Searching project...", "Loading assets: " + index + "/" + prefabAssetCount, ((float)index / prefabAssetCount));
+                    }
+
+
+                    EditorUtility.DisplayProgressBar("Searching project...", "Search assets", 0.2f);
+
+                    DoSearchObjects(allPrefabs, true);
+
+                    EditorUtility.ClearProgressBar();
                     break;
                 default:
                     break;
@@ -434,7 +476,7 @@ namespace KeaneGames.AdvancedSceneSearch
 
         }
 
-        private void DoSearchScenes(string[] scenes)
+        private void DoSearchScenes(string[] scenes, bool stopOnResult)
         {
             bool cancel = false;
             for (int i = 0; i < scenes.Length; i++)
@@ -446,13 +488,22 @@ namespace KeaneGames.AdvancedSceneSearch
                     break;
                     
                 EditorSceneManager.OpenScene(scene, OpenSceneMode.Single);
-                DoSearchCurrentScene(false);
+                bool results = DoSearchCurrentScene(false);
+
+                if (results && stopOnResult)
+                    break;
             };
 
             EditorUtility.ClearProgressBar();
         }
 
-        private void DoSearchCurrentScene(bool clear)
+        /// <summary>
+        /// Searches the current scene for any matches
+        /// </summary>
+        /// <param name="clear">Should the results window be cleared?</param>
+        /// <param name="stopOnResult">Should this stop as soon as we find matches?</param>
+        /// <returns>Whether a match was found</returns>
+        private bool DoSearchCurrentScene(bool clear)
         {
             List<GameObject> objs = null;
 
@@ -479,10 +530,16 @@ namespace KeaneGames.AdvancedSceneSearch
             }
 
 
-            DoSearchObjects(objs, clear);
+            return DoSearchObjects(objs, clear);
         }
 
-        public void DoSearchObjects(IEnumerable<GameObject> selectedObjs, bool clear)
+        /// <summary>
+        /// Tests objects provided to see if they match the current filters
+        /// </summary>
+        /// <param name="selectedObjs">Objects to test</param>
+        /// <param name="clear">Should the results window be cleared</param>
+        /// <returns></returns>
+        public bool DoSearchObjects(IEnumerable<GameObject> selectedObjs, bool clear)
         {
             foreach (ASS_SearchFilter assSearchFilter in _filters)
             {
@@ -490,7 +547,8 @@ namespace KeaneGames.AdvancedSceneSearch
                     selectedObjs = assSearchFilter.ApplyFilter(selectedObjs);
             }
 
-            if (popupResults)
+
+            if (popupResults || CurrentSearchTarget != SearchType.CurrentScenes)
             {
                 ResultsWindow.SetResults(selectedObjs.ToArray(), clear);
             }
@@ -498,6 +556,9 @@ namespace KeaneGames.AdvancedSceneSearch
             {
                 Selection.objects = selectedObjs.ToArray();
             }
+
+
+            return selectedObjs.Any();
         }
 
         private AdvancedSceneSearchResultsWindow _resultsWindow;

@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Object = UnityEngine.Object;
 
 namespace KeaneGames.AdvancedSceneSearch
 {
@@ -15,6 +17,7 @@ namespace KeaneGames.AdvancedSceneSearch
             public GameObject GameObj;
             public int InstanceID;
             public Scene Scene;
+            public string ScenePath;
             public string Name;
             public string Path;
 
@@ -23,6 +26,7 @@ namespace KeaneGames.AdvancedSceneSearch
                 this.GameObj = obj;
                 this.InstanceID = obj.GetInstanceID();
                 this.Scene = obj.scene;
+                this.ScenePath = obj.scene.path;
                 this.Name = obj.name;
                 this.Path = GetPath(obj);
             }
@@ -47,6 +51,34 @@ namespace KeaneGames.AdvancedSceneSearch
                 }
                 sb.Append(obj.name);
                 return sb.ToString();
+            }
+
+            
+
+            public void TrySelect()
+            {
+                if (GameObj == null)
+                {
+                    // Are we in the right scene?
+                   
+                    if (String.IsNullOrEmpty(Scene.name))
+                    {
+                        // awww
+                        Scene = EditorSceneManager.OpenScene(ScenePath);
+                    }
+
+                    Object instanceIdToObject = EditorUtility.InstanceIDToObject(InstanceID);
+                    GameObj = (GameObject)instanceIdToObject;
+
+                    if (GameObj == null)
+                    {
+                        // sigh. TODO: Replace this with a better solution. Either store transform orders or atleast search via the path, not just the object name!
+                        Debug.LogWarning("GameObject referenece was lost - finding the object by name. If multiple things in this scene share a name, this may return the wrong prefab." + Environment.NewLine + "Rerun your search in the current scene to fix this.");
+                        GameObj = GameObject.Find(Name);
+                    }
+                }
+
+                Selection.activeObject = GameObj;
             }
         }
 
@@ -117,7 +149,8 @@ namespace KeaneGames.AdvancedSceneSearch
 
                         if (GUILayout.Button(result.Path, EditorStyles.largeLabel, GUILayout.ExpandWidth(false)))
                         {
-                            Selection.activeGameObject = result.GameObj;
+                            result.TrySelect();
+                            //Selection.activeGameObject = result.GameObj;
                         }
 
                         GUILayout.EndHorizontal();
