@@ -39,6 +39,7 @@ namespace KeaneGames.AdvancedSceneSearch
             AllEnabledScenes,
             AllScenes,
             Project,
+            Everything,
         }
 
         public SearchType CurrentSearchTarget;
@@ -416,6 +417,26 @@ namespace KeaneGames.AdvancedSceneSearch
                     DoSearchScenes(enabledScenes, stopOnResult);
                     break;
                 case SearchType.AllScenes:
+                    { 
+                        ResultsWindow.Clear();
+                        var allSceneData = EditorBuildSettings.scenes;
+
+                        string[] allScenes = new string[allSceneData.Length];
+
+                        for (int i = 0; i < allSceneData.Length; i++)
+                        {
+                            allScenes[i] = allSceneData[i].path;
+                        }
+
+                        DoSearchScenes(allScenes, stopOnResult);
+                        break;
+                    }
+                case SearchType.Project:
+
+                    DoSearchProject(stopOnResult, true);
+                    break;
+                case SearchType.Everything:
+                    {
                     ResultsWindow.Clear();
                     var allSceneData = EditorBuildSettings.scenes;
 
@@ -427,59 +448,62 @@ namespace KeaneGames.AdvancedSceneSearch
                     }
 
                     DoSearchScenes(allScenes, stopOnResult);
+                    DoSearchProject(stopOnResult, false);
+
                     break;
-                case SearchType.Project:
-
-                    EditorUtility.DisplayProgressBar("Searching project...", "Collecting assets", 0f);
-
-                    string[] allAssetPaths = AssetDatabase.GetAllAssetPaths();
-                    List<string> prefabAssetPaths = new List<string>();
-                    foreach (string path in allAssetPaths)
-                    {
-                        if(!path.Contains(".prefab"))
-                            continue;
-
-                        prefabAssetPaths.Add(path);
                     }
-
-
-                    EditorUtility.DisplayProgressBar("Searching project...", "Loading assets", 0.01f);
-
-                    List<GameObject> allPrefabs = new List<GameObject>();
-
-                    int prefabAssetCount = prefabAssetPaths.Count;
-                    for (int index = 0; index < prefabAssetCount; index++)
-                    {
-                        string prefabAssetPath = prefabAssetPaths[index];
-                        Object[] prefab = AssetDatabase.LoadAllAssetsAtPath(prefabAssetPath);
-
-                        foreach (Object o in prefab)
-                        {
-                            GameObject gameObject = o as GameObject;
-
-                            if(gameObject == null)
-                                continue;
-
-                            allPrefabs.Add(gameObject);
-                        }
-
-
-
-                        EditorUtility.DisplayProgressBar("Searching project...", "Loading assets: " + index + "/" + prefabAssetCount, ((float)index / prefabAssetCount));
-                    }
-
-
-                    EditorUtility.DisplayProgressBar("Searching project...", "Search assets", 0.2f);
-
-                    DoSearchObjects(allPrefabs, true);
-
-                    EditorUtility.ClearProgressBar();
-                    break;
-                default:
-                    break;
             }
 
 
+        }
+
+        private void DoSearchProject(bool stopOnResult, bool clear)
+        {
+
+            EditorUtility.DisplayProgressBar("Searching project...", "Collecting assets", 0f);
+
+            string[] allAssetPaths = AssetDatabase.GetAllAssetPaths();
+            List<string> prefabAssetPaths = new List<string>();
+            foreach (string path in allAssetPaths)
+            {
+                if (!path.Contains(".prefab"))
+                    continue;
+
+                prefabAssetPaths.Add(path);
+            }
+
+
+            EditorUtility.DisplayProgressBar("Searching project...", "Loading assets", 0.01f);
+
+            List<GameObject> allPrefabs = new List<GameObject>();
+
+            int prefabAssetCount = prefabAssetPaths.Count;
+            for (int index = 0; index < prefabAssetCount; index++)
+            {
+                string prefabAssetPath = prefabAssetPaths[index];
+                Object[] prefab = AssetDatabase.LoadAllAssetsAtPath(prefabAssetPath);
+
+                foreach (Object o in prefab)
+                {
+                    GameObject gameObject = o as GameObject;
+
+                    if (gameObject == null)
+                        continue;
+
+                    allPrefabs.Add(gameObject);
+                }
+
+
+
+                EditorUtility.DisplayProgressBar("Searching project...", "Loading assets: " + index + "/" + prefabAssetCount, ((float)index / prefabAssetCount));
+            }
+
+
+            EditorUtility.DisplayProgressBar("Searching project...", "Search assets", 0.2f);
+
+            DoSearchObjects(allPrefabs, clear);
+
+            EditorUtility.ClearProgressBar();
         }
 
         private void DoSearchScenes(string[] scenes, bool stopOnResult)
