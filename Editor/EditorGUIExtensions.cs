@@ -7,34 +7,15 @@ namespace KeaneGames.AdvancedSceneSearch
 {
     public static class EditorGUIExtensions
     {
-        private static List<int> _layerNumbers = new List<int>();
 
         public static LayerMask LayerMaskField(string label, LayerMask layerMask)
         {
-            string[] layers = InternalEditorUtility.layers;
+            var layers = new string[32];
 
-            _layerNumbers.Clear();
+            for (int i = 0; i < 32; i++)
+                layers[i] = i + ": " + LayerMask.LayerToName(i);
 
-            for (int i = 0; i < layers.Length; i++)
-                _layerNumbers.Add(LayerMask.NameToLayer(layers[i]));
-
-            int maskWithoutEmpty = 0;
-            for (int i = 0; i < _layerNumbers.Count; i++)
-            {
-                if (((1 << _layerNumbers[i]) & layerMask.value) > 0)
-                    maskWithoutEmpty |= 1 << i;
-            }
-
-            maskWithoutEmpty = EditorGUILayout.MaskField(label, maskWithoutEmpty, layers);
-
-            int mask = 0;
-            for (int i = 0; i < _layerNumbers.Count; i++)
-            {
-                if ((maskWithoutEmpty & (1 << i)) > 0)
-                    mask |= 1 << _layerNumbers[i];
-            }
-
-            layerMask.value = mask;
+            layerMask.value = EditorGUILayout.MaskField(label, layerMask.value, layers);
 
             return layerMask;
         }

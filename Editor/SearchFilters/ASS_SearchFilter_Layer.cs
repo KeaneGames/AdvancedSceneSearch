@@ -18,7 +18,7 @@ namespace KeaneGames.AdvancedSceneSearch
 
         public override void Reset()
         {
-            _layerMask = (int)(((long)1 << (InternalEditorUtility.layers.Length + 3)) - 1);
+            _layerMask = ~0;
 
             base.Reset();
         }
@@ -32,10 +32,7 @@ namespace KeaneGames.AdvancedSceneSearch
 
         public override bool Actionable
         {
-            get
-            {
-                return _layerMask != ~0;
-            }
+            get { return !(_layerMask == ~0 || _layerMask == 0); }
         }
 
 
@@ -49,19 +46,11 @@ namespace KeaneGames.AdvancedSceneSearch
 
         public override string GetFilterText()
         {
-            string searchInfo = "";
-
-            int allLayers = (1 << InternalEditorUtility.layers.Length) - 1;
-            if (_layerMask == ~0 || _layerMask == ((1 << (allLayers + 1)) - 1) || _layerMask == 0)
-            {
+            if (!Actionable)
                 return "";
-            }
-            else
-            {
-                searchInfo = "Specific layers set" + Environment.NewLine;
-            }
 
-            return searchInfo;
+            return "Specific layers set" + Environment.NewLine;
+
         }
     }
 }
