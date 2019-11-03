@@ -91,6 +91,10 @@ namespace KeaneGames.AdvancedSceneSearch
         public override string GetFilterText()
         {
             string searchInfo = "";
+
+            if (_shader != null)
+                searchInfo += "Renderers that use the shader \"" + _shader.name + "\"" + Environment.NewLine;
+
             return searchInfo;
         }
 

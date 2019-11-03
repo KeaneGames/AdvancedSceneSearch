@@ -19,6 +19,8 @@ namespace KeaneGames.AdvancedSceneSearch
         public GUIStyle SearchFieldCancelButtonEmpty;
         public GUIStyle TextField;
 
+        public GUIStyle FilterEnabled;
+        public GUIStyle FilterDisabled;
         public Texture2D GetBox(Color col)
         {
             int size = 5;
@@ -56,6 +58,8 @@ namespace KeaneGames.AdvancedSceneSearch
             SearchFieldCancelButton = GetStyle("SearchCancelButton");
             SearchFieldCancelButtonEmpty = GetStyle("SearchCancelButtonEmpty");
 
+            FilterEnabled = GetStyle("WinBtnMaxMac");
+            FilterDisabled = GetStyle("WinBtnInactiveMac");
 
             DropFieldAll = new GUIStyle
             {

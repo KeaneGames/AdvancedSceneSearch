@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using System;
+using UnityEditor;
 using UnityEngine;
 
 namespace KeaneGames.AdvancedSceneSearch
@@ -7,14 +8,18 @@ namespace KeaneGames.AdvancedSceneSearch
     {
         public string PrefsKey;
         public string SettingName;
+        public Type[] Filters;
 
         private const string SETTINGS_KEY = "KeaneSharedAdvancedSceneSearch";
         private bool _state;
 
-        public SettingData(string settingName, string prefsKey, bool defaultValue)
+
+
+        public SettingData(string settingName, string prefsKey, bool defaultValue, Type[] filters = null)
         {
             SettingName = settingName;
             PrefsKey = prefsKey;
+            Filters = filters;
             _state = EditorPrefs.GetBool(SETTINGS_KEY + PrefsKey, defaultValue);
         }
 

@@ -342,12 +342,19 @@ namespace KeaneGames.AdvancedSceneSearch
             {
                 if (assSearchFilter.Enabled)
                 {
+                    GUILayout.BeginHorizontal();
+                    GUILayout.Box(assSearchFilter.Actionable ? Styles.FilterEnabled.normal.background : Styles.FilterDisabled.normal.background, EditorStyles.label, GUILayout.Width(16)); 
+                    
                     if (assSearchFilter.Actionable)
                         GUI.color = normalColor;
                     else
-                        GUI.color = new Color(1,1,1,0.5f);
+                        GUI.color = new Color(0.8f,0.8f,0.8f,0.8f);
 
+                    GUILayout.BeginVertical();
                     assSearchFilter.DrawSearchGui();
+                    GUILayout.EndVertical();
+
+                    GUILayout.EndHorizontal();
                 }
             }
             GUI.color = normalColor;
@@ -359,7 +366,8 @@ namespace KeaneGames.AdvancedSceneSearch
             {
                 foreach (SettingData setting in SettingsDataHolder.AllSettings)
                 {
-                    setting.DrawButton();
+                    if(setting.Filters == null || setting.Filters.Length == 0 || setting.Filters.Any(x => _filters.Any(y => y.GetType() == x && y.Enabled)))
+                        setting.DrawButton();
                 }
             }
             GUILayout.EndHorizontal();
@@ -391,17 +399,83 @@ namespace KeaneGames.AdvancedSceneSearch
 
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
-            string searchInfo = "You are searching for gameObjects with: " + Environment.NewLine;
 
-            foreach (ASS_SearchFilter assSearchFilter in _filters)
+            if (!AnyFiltersEnabled)
             {
-                searchInfo += assSearchFilter.GetFilterText();
-            }
 
-            GUILayout.Label(searchInfo, EditorStyles.centeredGreyMiniLabel);
+                EditorGUILayout.HelpBox("No filters enabled!" + Environment.NewLine
+                                                              + "Enable some in the settings." + Environment.NewLine
+                                                              + Environment.NewLine + 
+                                                              "Access the settings in the dropdown in the top-right of this window!", MessageType.Error);
+            }
+            else if (!AnyFiltersActionable)
+            {
+
+                EditorGUILayout.HelpBox("You don't have any search filters set." + Environment.NewLine +
+                    "Enable some above, or all objects will be returned", MessageType.Warning);
+            }
+            else
+            {
+                string searchInfo = "You are searching for gameObjects with: " + Environment.NewLine;
+
+                foreach (ASS_SearchFilter assSearchFilter in _filters)
+                {
+                    searchInfo += assSearchFilter.GetFilterText();
+                }
+
+                switch (CurrentSearchTarget)
+                {
+                    case SearchType.CurrentScenes:
+                        searchInfo += "In: all currently open scenes";
+                        break;
+                    case SearchType.AllEnabledScenes:
+                        searchInfo += "In: all enabled scenes in the build settings";
+                        break;
+                    case SearchType.AllScenes:
+                        searchInfo += "In: all scenes in the build settings";
+                        break;
+                    case SearchType.Project:
+                        searchInfo += "In: all prefabs in the Project";
+                        break;
+                    case SearchType.Everything:
+                        searchInfo += "In: all scenes in the build settings, and all prefabs in the Project";
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
+                EditorGUILayout.HelpBox(searchInfo, MessageType.Info);
+            }
 
 
             DropAreaGUI();
+        }
+
+        public bool AnyFiltersActionable
+        {
+            get
+            {
+                foreach (ASS_SearchFilter assSearchFilter in _filters)
+                {
+                    if (assSearchFilter.Enabled && assSearchFilter.Actionable)
+                        return true;
+                }
+
+                return false;
+            }
+        }
+        public bool AnyFiltersEnabled
+        {
+            get
+            {
+                foreach (ASS_SearchFilter assSearchFilter in _filters)
+                {
+                    if (assSearchFilter.Enabled)
+                        return true;
+                }
+
+                return false;
+            }
         }
 
         public void DoSearch(bool stopOnResult = false)

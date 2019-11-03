@@ -138,7 +138,7 @@ namespace KeaneGames.AdvancedSceneSearch
         {
             string searchInfo = "";
             if (!string.IsNullOrEmpty(_nameSearch))
-                searchInfo += "A name containing \"" + _nameSearch + "\"" + Environment.NewLine;
+                searchInfo += "A MeshFilter with a mesh name containing \"" + _nameSearch + "\"" + Environment.NewLine;
             return searchInfo;
         }
 

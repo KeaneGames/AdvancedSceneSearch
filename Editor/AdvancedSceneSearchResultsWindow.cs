@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -29,6 +30,7 @@ namespace KeaneGames.AdvancedSceneSearch
                 this.ScenePath = obj.scene.path;
                 this.Name = obj.name;
                 this.Path = GetPath(obj);
+
             }
 
             public string GetPath(GameObject obj)
@@ -75,6 +77,7 @@ namespace KeaneGames.AdvancedSceneSearch
                         // sigh. TODO: Replace this with a better solution. Either store transform orders or atleast search via the path, not just the object name!
                         Debug.LogWarning("GameObject referenece was lost - finding the object by name. If multiple things in this scene share a name, this may return the wrong prefab." + Environment.NewLine + "Rerun your search in the current scene to fix this.");
                         GameObj = GameObject.Find(Name);
+
                     }
                 }
 
@@ -143,6 +146,15 @@ namespace KeaneGames.AdvancedSceneSearch
 
                 if(resultPair.Value.Expanded)
                 {
+                    GUILayout.BeginHorizontal();
+
+                    if (GUILayout.Button("Select All"))
+                    {
+                        Selection.objects = resultPair.Value.Results.Select(x => x.GameObj).ToArray();
+                    }
+
+                    GUILayout.EndHorizontal();
+
                     foreach (Result result in resultPair.Value.Results)
                     {
                         GUILayout.BeginHorizontal();
@@ -156,6 +168,8 @@ namespace KeaneGames.AdvancedSceneSearch
                         GUILayout.EndHorizontal();
                     }
                 }
+
+
 
                 GUILayout.EndVertical();
             }

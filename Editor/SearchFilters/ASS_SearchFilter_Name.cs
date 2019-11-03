@@ -102,7 +102,21 @@ namespace KeaneGames.AdvancedSceneSearch
         {
             string searchInfo = "";
             if (!string.IsNullOrEmpty(_nameSearch))
-                searchInfo += "A name containing \"" + _nameSearch + "\"" + Environment.NewLine;
+            {
+
+                if(Settings.UseRegex.State)
+                    searchInfo += "A name matching the regex: \"" + _nameSearch + "\"";
+                else if (Settings.MatchWholeWord.State)
+                    searchInfo += "A name of exactly: \"" + _nameSearch + "\"";
+                else
+                    searchInfo += "A name containing \"" + _nameSearch + "\"";
+            }
+
+            if(Settings.CaseSensitive.State)
+                searchInfo += " (case sensitive)";
+
+            searchInfo += Environment.NewLine;
+
             return searchInfo;
         }
 

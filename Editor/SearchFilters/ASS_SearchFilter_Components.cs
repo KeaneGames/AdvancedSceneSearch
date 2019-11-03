@@ -228,8 +228,17 @@ namespace KeaneGames.AdvancedSceneSearch
 
         private bool ComponentMatch(Component x, TypeSearchData typeData)
         {
-            if (typeData.Type.SystemType != x.GetType())
-                return false;
+            if (Settings.IncludeSubClasses.State)
+            {
+                if (!x.GetType().IsSubclassOf(typeData.Type.SystemType))
+                    return false;
+            }
+            else
+            {
+                if (typeData.Type.SystemType != x.GetType())
+                    return false;
+
+            }
 
             if (typeData.SerializedVars != null && typeData.SerializedVars.Count > 0)
             {
@@ -325,14 +334,18 @@ namespace KeaneGames.AdvancedSceneSearch
                     continue;
 
                 if (typeSearch.Amount == 0)
-                    searchInfo += "No " + typeSearch.Type.Name + "s" + Environment.NewLine;
+                    searchInfo += "No " + typeSearch.Type.Name + "s";
                 else if (typeSearch.Amount < 0)
-                    searchInfo += "1 or more " + typeSearch.Type.Name + "s" + Environment.NewLine;
+                    searchInfo += "1 or more " + typeSearch.Type.Name + "s";
                 else if (typeSearch.Amount == 1)
-                    searchInfo += "Exactly " + typeSearch.Amount + " " + typeSearch.Type.Name + Environment.NewLine;
+                    searchInfo += "Exactly " + typeSearch.Amount + " " + typeSearch.Type.Name;
                 else
-                    searchInfo += "Exactly " + typeSearch.Amount + " " + typeSearch.Type.Name + "s" +
-                                  Environment.NewLine;
+                    searchInfo += "Exactly " + typeSearch.Amount + " " + typeSearch.Type.Name + "s";
+
+                if (typeSearch.SerializedVars != null && typeSearch.SerializedVars.Count > 0)
+                    searchInfo += " with specific properties set";
+
+                searchInfo += Environment.NewLine;
             }
 
             return searchInfo;
