@@ -15,9 +15,10 @@ namespace KeaneGames.AdvancedSceneSearch
 
         protected AdvancedSceneSearch main;
 
-        protected ASS_SearchFilter(string name)
+        protected ASS_SearchFilter(string name, bool enabledDefault = true)
         {
             FilterName = name;
+            this._enabled = enabledDefault;
         }
 
         protected StyleData StyleData

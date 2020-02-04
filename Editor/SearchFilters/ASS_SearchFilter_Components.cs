@@ -230,7 +230,7 @@ namespace KeaneGames.AdvancedSceneSearch
         {
             if (Settings.IncludeSubClasses.State)
             {
-                if (!x.GetType().IsSubclassOf(typeData.Type.SystemType))
+                if (!(x.GetType().IsSubclassOf(typeData.Type.SystemType) || typeData.Type.SystemType == x.GetType()))
                     return false;
             }
             else

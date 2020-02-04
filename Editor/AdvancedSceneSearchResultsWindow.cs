@@ -13,7 +13,7 @@ namespace KeaneGames.AdvancedSceneSearch
     public class AdvancedSceneSearchResultsWindow : EditorWindow
     {
 
-        public struct Result
+        public class Result
         {
             public GameObject GameObj;
             public int InstanceID;
@@ -21,8 +21,12 @@ namespace KeaneGames.AdvancedSceneSearch
             public string ScenePath;
             public string Name;
             public string Path;
+            public bool Ticked;
 
-            public Result(GameObject obj) : this()
+            public string guid;
+            public long localId;
+
+            public Result(GameObject obj)
             {
                 this.GameObj = obj;
                 this.InstanceID = obj.GetInstanceID();
@@ -30,6 +34,7 @@ namespace KeaneGames.AdvancedSceneSearch
                 this.ScenePath = obj.scene.path;
                 this.Name = obj.name;
                 this.Path = GetPath(obj);
+                this.Ticked = false;
 
             }
 
@@ -121,6 +126,12 @@ namespace KeaneGames.AdvancedSceneSearch
 
         public void StoreResult(GameObject obj)
         {
+            if (obj == null)
+            {
+                Debug.LogWarning("Tried to store a null object?");
+                return;
+            }
+
             string scenePath = (obj.scene != null && obj.scene.path != null) ? obj.scene.path : "Project";
 
             if (!Results.ContainsKey(scenePath))
@@ -152,6 +163,18 @@ namespace KeaneGames.AdvancedSceneSearch
                     {
                         Selection.objects = resultPair.Value.Results.Select(x => x.GameObj).ToArray();
                     }
+                    if (GUILayout.Button("Select Ticked"))
+                    {
+                        Selection.objects = resultPair.Value.Results.Where(x => x.Ticked).Select(x => x.GameObj).ToArray();
+                    }
+
+                    if (GUILayout.Button("Toggle Selection"))
+                    {
+                        foreach (Result result in resultPair.Value.Results)
+                        {
+                            result.Ticked = !result.Ticked;
+                        }
+                    }
 
                     GUILayout.EndHorizontal();
 
@@ -159,6 +182,8 @@ namespace KeaneGames.AdvancedSceneSearch
                     {
                         GUILayout.BeginHorizontal();
 
+
+                        result.Ticked = GUILayout.Toggle(result.Ticked, "", GUILayout.ExpandWidth(false));
                         if (GUILayout.Button(result.Path, EditorStyles.largeLabel, GUILayout.ExpandWidth(false)))
                         {
                             result.TrySelect();

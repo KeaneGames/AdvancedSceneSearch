@@ -74,7 +74,8 @@ namespace KeaneGames.AdvancedSceneSearch
         [SerializeField]
         private ASS_SearchFilter_MeshName _filterMeshName;
 
-
+        [SerializeField]
+        private ASS_SearchFilter_CollectPrefabReferences _filterCollectPrefabRefs;
 
         [SerializeField]
         private ASS_SearchFilter[] _filters;
@@ -156,11 +157,14 @@ namespace KeaneGames.AdvancedSceneSearch
                 _filterShader = new ASS_SearchFilter_Shader();
             if (_filterMeshName == null)
                 _filterMeshName = new ASS_SearchFilter_MeshName();
+            if (_filterCollectPrefabRefs == null)
+                _filterCollectPrefabRefs = new ASS_SearchFilter_CollectPrefabReferences();
+
 
             if (_filters == null)
                 _filters = new ASS_SearchFilter[]
                 {
-                    _filterName, _filterTag, _filterLayer, _filterComponents, _filterShader, _filterMeshName
+                    _filterCollectPrefabRefs, _filterName, _filterTag, _filterLayer, _filterComponents, _filterShader, _filterMeshName
                 };
 
 
